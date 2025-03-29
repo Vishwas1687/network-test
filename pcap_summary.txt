@@ -1,0 +1,52 @@
+1) var start = "1742907141"
+var end = "1742910392"
+
+March 25th 18:20 to 19:15
+
+http://localhost:9090/api/v1/query_range?query=%s&start=%s&end=%s&step=10s
+
+s8 = Flow Table Exhaustion and Syn flood attack
+s1, s6, s3 = Syn flood attack
+
+
+2) start = "1742964650"
+end = 1742965199
+
+March 26th 10:20 to 10:30
+
+s8, s6, s10, s7 = Syn flood attack
+
+3) start = 1742966300
+   end = 1742966554
+   
+March 26th 10:47 to 10:53
+
+s4, s5, s10, s7 = Syn flood attack
+
+4) start = 1742972840
+end = 1742973929
+
+March 26th 12:35 to 12:55
+
+s10, s6, s5, s8,  -> genuine high traffic with some syn floods and push flag (Retransmissions) (Let's consider elephant flows if packet in also shows high)
+
+s3 -> Syn flood attack, 
+
+s7, s2, s4, s9-> Normal Traffic
+
+5) start = 1742977037
+end = 1742977868
+
+March 26th 13:47 to 14:01
+
+s9, s8, s5, s4,  -> Elephant Flows
+s7, s6, s2, s3, s10 - > Normal Traffic
+
+
+
+
+
+
+
+
+
