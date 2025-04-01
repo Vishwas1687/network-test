@@ -27,7 +27,7 @@ func parseDuration(data string, sw string) {
 	scanner := bufio.NewScanner(strings.NewReader(data))
 	durationRegex := regexp.MustCompile(`duration=(\d+)`)
 	var flowCount, elephantFLows float64
-	var Threshold float64 = 2000
+	var Threshold float64 = 300
 	var skipFirstLine bool = true
 	for scanner.Scan() {
 		line := scanner.Text()
