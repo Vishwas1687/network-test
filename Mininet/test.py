@@ -33,130 +33,58 @@ class CustomTopo(Topo):
             self.addLink(switches[i], switches[i + 1])
 
 # Function to start iperf (genuine high traffic)
-def run_iperf(net, sender, receiver, port, duration):
+def run_iperf(net, sender, receiver, duration=180):
     h1 = net.get(sender)
     h2 = net.get(receiver)
     
     print(f"Starting iPerf Server on {receiver}")
     h2.cmd('pkill -f iperf')  # Kill any existing iperf processes
-    h2.cmd(f'iperf -s -p {port} &')
+    h2.cmd('iperf -s &')
     time.sleep(2)
 
     print(f"Running iPerf Client from {sender} to {receiver}")
     # Run in background and for the full duration
-    h1.cmd(f'iperf -c {h2.IP()} -t {duration} -p {port} -i 1 -b 100K -l 400 &')
+    h1.cmd(f'iperf -c {h2.IP()} -t {duration} -i 1 -b 100M &')
     
     # Keep the thread alive for the duration
     time.sleep(duration)
     print(f"iPerf traffic from {sender} to {receiver} completed")
-    
-def bursty_traffic(net):
-    
-    hosts = [net.get(f'h{i}') for i in range(1, 31)]
-    time.sleep(30)
-    
-    running_servers = set()
-    print("Bursty Traffic Started")
-    
-    for i in range(15):
-        # Select hosts that aren't currently waiting on commands
-        available_hosts = [h for h in hosts if not h.waiting]
-            
-        if len(available_hosts) < 2:
-            # Not enough available hosts, wait and try again
-            time.sleep(1)
-            continue
-                
-        # Choose server from available hosts
-        server_host = random.choice(available_hosts)
-        # Choose client from available hosts excluding the server
-        client_host = random.choice([h for h in available_hosts if h != server_host])
-            
-        # Get unique port for each server to avoid conflicts
-        server_port = 9000 + len(running_servers)
-        server_id = f"{server_host.name}:{server_port}"
-            
-        # Start iperf server with a unique port
-        server_host.sendCmd(f'iperf -s -p {server_port} > /dev/null 2>&1 &')
-        # Need to wait for command to complete and get shell prompt back
-        running_servers.add(server_id)
-        server_host.waitOutput()
 
-        # Start continuous client with varying bandwidths
-        bandwidth = random.randint(20, 30)  # Increased to 1M-5M bps for more reliable traffic
-        duration = random.randint(5, 10) 
-            
-        client_host.sendCmd(f'iperf -c {server_host.IP()} -p {server_port} -l 300 -t {duration} -b {bandwidth}M > /dev/null 2>&1 &')
-        client_host.waitOutput()
-        time.sleep(10)
-    
-    print("Bursty Traffic completed")
-        
 # Function to start SYN flood attack using hping3
-def run_hping3_syn_flood(net, duration):
-    hosts = [net.get(f'h{i}') for i in range(1, 31)]
-    time.sleep(30)
-    print("SYN Flood Attack Started")
+def run_hping3_syn_flood(net, attacker, target, duration=60):
+    h_attacker = net.get(attacker)
+    h_target = net.get(target)
 
-    for i in range(5):
-        # Select hosts that aren't currently waiting on commands
-        available_hosts = [h for h in hosts if not h.waiting]
-            
-        if len(available_hosts) < 2:
-            # Not enough available hosts, wait and try again
-            time.sleep(1)
-            continue
-                
-        # Choose the attacker from available hosts
-        attacker = random.choice(available_hosts)
-        # Choose the target from available hosts excluding itself and other attackers
-        target = random.choice([h for h in available_hosts if h != attacker])
-        
-        attacker.cmd(f"hping3 -S --faster -p 80 {target.IP()} & sleep 30; kill $!")
-        attacker.waitOutput()
-        time.sleep(40)
-        
-    print("SYN flood attack completed")
+    print(f"Starting SYN Flood attack from {attacker} to {target}")
+    h_attacker.cmd(f"hping3 -S --faster -p 80 {h_target.IP()} &")
+    time.sleep(duration)  # Run for the specified duration
+    h_attacker.cmd("pkill -f hping3")
+    print(f"Stopped SYN Flood attack from {attacker}")
 
 # Function to start UDP flood attack using hping3
-def run_hping3_udp_flood(net, duration):
-    hosts = [net.get(f'h{i}') for i in range(1, 31)]
-    time.sleep(30)
-    print("UDP Flood Attack Started")
+def run_hping3_udp_flood(net, attacker, target, duration=60):
+    h_attacker = net.get(attacker)
+    h_target = net.get(target)
 
-    for i in range(5):
-        # Select hosts that aren't currently waiting on commands
-        available_hosts = [h for h in hosts if not h.waiting]
-            
-        if len(available_hosts) < 2:
-            # Not enough available hosts, wait and try again
-            time.sleep(1)
-            continue
-                
-        # Choose the attacker from available hosts
-        attacker = random.choice(available_hosts)
-        # Choose the target from available hosts excluding itself and other attackers
-        target = random.choice([h for h in available_hosts if h != attacker])
-        
-        attacker.cmd(f"hping3 --udp --faster -p 53 {target.IP()} & sleep 30; kill $!")
-        attacker.waitOutput()
-        time.sleep(40)
-    print("UDP flood attack completed")
-        
+    print(f"Starting UDP Flood attack from {attacker} to {target}")
+    h_attacker.cmd(f"hping3 --udp --faster -p 53 {h_target.IP()} &")
+    time.sleep(duration)  # Run for the specified duration
+    h_attacker.cmd("pkill -f hping3")
+    print(f"Stopped UDP Flood attack from {attacker}")
+
 # Function to run a port scan using hping3
-def run_scan_attack(net, duration):
-    
-    time.sleep(30)
-    print("Flow table attack started")          
-    # Choose the attacker from available hosts
-    attacker = net.get("h1")
-    for i in range(30):
-        attacker.cmd(f"hping3 -S -i u100 --data 100 10.0.0.{i} & sleep 120; kill $!")
-        attacker.waitOutput()
-    print("Flow table attack completed")
-    time.sleep(150)
+def run_hping3_scan(net, scanner, target, duration=60):
+    h_scanner = net.get(scanner)
+    h_target = net.get(target)
 
-def generate_normal_traffic(net, duration=300):
+    print(f"Starting port scan on {target} from {scanner}")
+    # Run the scan in the background for the scan to continue during the simulation
+    h_scanner.cmd(f"hping3 -S {h_target.IP()} -p 1-1000 --scan &")
+    time.sleep(duration)  # Keep the thread alive for the duration
+    h_scanner.cmd("pkill -f hping3")
+    print(f"Finished port scan on {target}")
+
+def generate_normal_traffic(net, duration=180):
     """
     Generates substantial background traffic across the network to simulate realistic internet activity.
     """
@@ -175,7 +103,7 @@ def generate_normal_traffic(net, duration=300):
         if remaining <= 0:
             break
             
-        for i in range(random.randint(5,10)):
+        for i in range(5):
             # Select hosts that aren't currently waiting on commands
             available_hosts = [h for h in hosts if not h.waiting]
             
@@ -190,7 +118,7 @@ def generate_normal_traffic(net, duration=300):
             client_host = random.choice([h for h in available_hosts if h != server_host])
             
             # Get unique port for each server to avoid conflicts
-            server_port = 1000 + len(running_servers)
+            server_port = 5000 + len(running_servers)
             server_id = f"{server_host.name}:{server_port}"
             
             # Start iperf server with a unique port
@@ -200,14 +128,27 @@ def generate_normal_traffic(net, duration=300):
             running_servers.add(server_id)
             
             # Start continuous client with varying bandwidths
-            bandwidth = random.randint(20, 50)  # Increased to 10-50K bps for more reliable traffic
-            duration2 = min(remaining, random.randint(30, 60))  # Ensure we don't exceed total duration1
+            bandwidth = random.randint(2, 4)  # Increased to 10-50K bps for more reliable traffic
+            duration2 = min(remaining, random.randint(10, 30))  # Ensure we don't exceed total duration
             
-            client_host.sendCmd(f'iperf -c {server_host.IP()} -p {server_port} -l 300 -t {duration2} -b {bandwidth}K > /dev/null 2>&1 &')
+            client_host.sendCmd(f'iperf -c {server_host.IP()} -p {server_port} -l 512 -t {duration2} -b {bandwidth}K > /dev/null 2>&1 &')
             client_host.waitOutput()
             
         # Wait between iterations to reduce control overhead
         time.sleep(5)
+    
+    # Clean up running iperf servers
+    for host in hosts:
+        if not host.waiting:
+            host.cmd('pkill -f "iperf -s"')
+    
+    print("Normal background traffic completed.")
+    
+    # Cleanup the persistent sessions
+    for host in hosts:
+        host.cmd("pkill -f iperf")
+        host.cmd("pkill -f nmap")
+        host.cmd("pkill -f host")
 
 # Main function to control network and start traffic
 def start_network():
@@ -216,7 +157,7 @@ def start_network():
     net.start()
 
     # Choose hosts dynamically
-    sender, receiver = "h1", "h4"
+    sender, receiver = "h1", "h2"
     syn_attacker, syn_target = "h3", "h4"
     udp_attacker, udp_target = "h5", "h6"
     scanner, scan_target = "h7", "h8"
@@ -227,16 +168,15 @@ def start_network():
     time.sleep(5)
 
     # Traffic simulation duration in seconds
-    simulation_duration = 300
+    simulation_duration = 180
     
     # Create threads for all types of traffic
     threads = [
-        #threading.Thread(target=run_iperf, args=(net, sender, receiver, 8000,  simulation_duration)),
-        #threading.Thread(target=bursty_traffic, args=(net,)),
-        threading.Thread(target=generate_normal_traffic, args=(net, 300)),
-        #threading.Thread(target=run_hping3_syn_flood, args=(net, 300)),
-        #threading.Thread(target=run_hping3_udp_flood, args=(net, 300)),
-        #threading.Thread(target=run_scan_attack, args=(net, 300)),
+        threading.Thread(target=run_iperf, args=(net, sender, receiver, simulation_duration)),
+        threading.Thread(target=generate_normal_traffic, args=(net, simulation_duration)),
+        #threading.Thread(target=run_hping3_syn_flood, args=(net, syn_attacker, syn_target, simulation_duration)),
+        #threading.Thread(target=run_hping3_udp_flood, args=(net, udp_attacker, udp_target, simulation_duration)),
+        #threading.Thread(target=run_hping3_scan, args=(net, scanner, scan_target, simulation_duration)),
     ]
     
     # Start all threads

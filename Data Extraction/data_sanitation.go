@@ -8,27 +8,23 @@ import (
 )
 
 var infra_metrics = []string{
-	"Resource Utilization", "CPU Utilization", "Bridge Controller Status",
-	"Memory Per Bridge", "Rate of control Channel Flap", "Database Space Utilization",
+	"CPU Utilization", "Bridge Controller Status",
+	// "Rate of control Channel Flap",
 }
 
 // The field value dictates the label of type of attack on the switch
-// 0 - Normal Low Traffic , 1 - Dos Attack (SYN Flood),
-// 2 - Flow Table Exhaustion (Controller misconfiguration, controller compromised,
-// control channel attack)
-// 3 - Genuine Medium traffic (Syn packets don't exist so much but packet in messages are generated in this)
-// 5 - Dos Attack and Flow Table Exhaustion
+// 0 -  Normal Low Traffic
+// 2 -  Genuine Elephant Traffic
+// 3 -  Genuine Bursty Traffic
+// 4 -  SYN Flood Attack
+// 5 -  Flow Table Exhaustion Attack
 
 var switches map[string]string = map[string]string{
-	"s2":  "0",
-	"s3":  "0",
-	"s4":  "3",
-	"s5":  "3",
-	"s6":  "0",
-	"s7":  "0",
-	"s8":  "3",
-	"s9":  "3",
-	"s10": "0",
+	"s1": "3",
+	"s2": "3",
+	"s3": "3",
+	"s4": "0",
+	"s5": "0",
 }
 
 // contains checks if a given item exists in a slice of strings.
@@ -120,15 +116,12 @@ func processSwitch(switch_name string, label string) {
 	// Two new columns are created which stores the values of different interfaces of a
 	// switch as a list of list of values into one single column.
 	interface_utilization := [][]string{}
-	asymmetric_traffic_volume := [][]string{}
 
 	// This loop is what merges the different interfaces metrics of a switch to one
 	// metric per switch by joining the lists to a single 2D list.
 	for _, metric := range header {
 		if strings.Contains(metric, "Interface Utilization Percentage - "+switch_name+"-") {
 			interface_utilization = append(interface_utilization, metricValues[metric])
-		} else if strings.Contains(metric, "Asymmetric Traffic Volume - "+switch_name+"-") {
-			asymmetric_traffic_volume = append(asymmetric_traffic_volume, metricValues[metric])
 		} else if (strings.Contains(metric, switch_name) && !strings.Contains(metric, switch_name+"-")) || contains(infra_metrics, metric) {
 			outputRow = append(outputRow, fmt.Sprintf("[%s]", strings.Join(metricValues[metric], ",")))
 		}
@@ -141,13 +134,7 @@ func processSwitch(switch_name string, label string) {
 		flattenedInterfaceUtilization = append(flattenedInterfaceUtilization, fmt.Sprintf("[%s]", strings.Join(row, ",")))
 	}
 
-	flattenedAsymmetricTrafficVolume := []string{}
-	for _, row := range asymmetric_traffic_volume {
-		flattenedAsymmetricTrafficVolume = append(flattenedAsymmetricTrafficVolume, fmt.Sprintf("[%s]", strings.Join(row, ",")))
-	}
-
 	outputRow = append(outputRow, "["+strings.Join(flattenedInterfaceUtilization, ",")+"]")
-	outputRow = append(outputRow, "["+strings.Join(flattenedAsymmetricTrafficVolume, ",")+"]")
 
 	// This loop appends the label to the end of the row to the last column
 	outputRow = append(outputRow, label)
@@ -181,7 +168,7 @@ func processSwitch(switch_name string, label string) {
 				newHeader = append(newHeader, values[0])
 			}
 		}
-		newHeader = append(newHeader, "Interface Utilization", "Asymmetric Traffic Volume", "label")
+		newHeader = append(newHeader, "Interface Utilization", "label")
 		writer.Write(newHeader)
 	}
 

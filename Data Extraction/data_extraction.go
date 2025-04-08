@@ -26,21 +26,17 @@ type PrometheusResponse struct {
 	} `json:"data"`
 }
 
-// 1742916761
 var duration = "5m"
-var start = "1742977037"
-var end = "1742977868"
+var start = "1743589290"
+var end = "1743589340"
 
 // Key - Metric Name
 // Value - Prometheus Query
 var metrics = map[string]map[string]string{
 	"infra_metrics": {
-		"Resource Utilization":         "ovs_resource_utilization",
-		"CPU Utilization":              "ovs_cpu_utilization",
-		"Bridge Controller Status":     "ovs_bridge_controller_status",
-		"Memory Per Bridge":            "ovs_memory_per_bridge",
-		"Rate of control Channel Flap": "rate(ovs_control_channel_flap[" + duration + "])",
-		"Database Space Utilization":   "ovs_db_space_utilization",
+		"CPU Utilization":          "ovs_cpu_utilization",
+		"Bridge Controller Status": "ovs_bridge_controller_status",
+		//"Rate of control Channel Flap": "rate(ovs_control_channel_flap[" + duration + "])",
 	},
 	"switch_metrics": {
 		"Flow Table Utilization":         "ovs_flow_table_utilization",
@@ -48,11 +44,9 @@ var metrics = map[string]map[string]string{
 		"Rate of Packet in Messages":     "rate(ovs_packet_in[" + duration + "])",
 		"Average Packets Per Flow":       "ovs_average_packets_per_flow",
 		"Average Flow Duration":          "ovs_average_flow_duration",
-		"Flow Stablity Index":            "ovs_flow_stability_index",
 		"Rate of Port Flapping":          "rate(ovs_port_flapping[" + duration + "])",
 	},
 	"interface_metrics": {
-		"Asymmetric Traffic Volume":        "(delta(ovs_inbound_outbound[" + duration + "]) / delta(ovs_total_bytes_interface[" + duration + "])) * 100",
 		"Interface Utilization Percentage": "(rate(ovs_interface_bytes[1m])/(ovs_interface_link_speed * 60)) * 100",
 	},
 }
@@ -67,7 +61,7 @@ func fetchMetrics() (map[string][]string, error) {
 		for metricName, query := range metricGroup {
 			// Creating dynamic Prometheus query URL with proper URL encoding
 			encodedQuery := url.QueryEscape(query)
-			queryURL := fmt.Sprintf("http://localhost:9090/api/v1/query_range?query=%s&start=%s&end=%s&step=30s",
+			queryURL := fmt.Sprintf("http://localhost:9090/api/v1/query_range?query=%s&start=%s&end=%s&step=10s",
 				encodedQuery, start, end)
 
 			// Fetching data from Prometheus
