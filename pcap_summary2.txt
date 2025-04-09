@@ -3,18 +3,117 @@ end = 1743749600
 
 April 4th 12:17 to 12:22 (PM)
 
-Flow Table Exhaustion and SYN flood attack (Verify Properly)
-
-s2,s4,s5 = SYN flood and Flow table exhaustion attack
+s2,s4,s5 = SYN flood 
 s1,s3 = Normal Traffic
 
-2) start = 1743750250
-end = 1743750660
+2) start =  1744129206
+end = 1744129550
 
-April 4th 12:35 to 12:41 (PM)
+April 8th 9:50 to 9:56 (PM)
 
-s1,s4,s5 = UDP flood attack
-s2,s3 = Normal Traffic
+s1, s2, s3, s4 = SYN flood
+s5 = Normal Traffic
 
-4) 
+3) start = 1744129664
+end = 1744129975
+
+April 8th 9:57 to 10:04 (PM)
+
+s3, s2, s5 = SYN flood
+s1,s4 = Normal Traffic
+
+4) start = 1744130101
+end = 1744130650
+
+April 8th 10:05 to 10:14 (PM)
+
+s5, s3, s2, s4 = SYN flood
+s1 = Normal Traffic
+
+
+5) start = 1744130702
+end = 1744131050
+
+April 8th 10:15 to 10:21 (PM)
+
+s3, s1, s4, s2  = SYN flood
+s5 = Normal Traffic 
+
+6) start = 1744131371
+end = 1744131800
+
+April 8th 10:25 to 10:33 (PM)
+
+s4, s2, s1  = SYN flood
+s3, s4 = Normal Traffic
+
+7) start = 1744131911
+end = 1744132250
+
+April 8th 10:35 to 10:41 (PM)
+
+s1, s2, s3 = SYN flood
+s4, s5 = Bursty Traffic
+
+8) start = 1744182842
+end = 1744183200
+
+April 9th 12:43 to 12:49 (PM)
+
+s3, s5 = SYN flood
+s2, s1, s4 = Bursty Traffic
+
+9) start = 1744183274
+end = 1744183600
+
+April 9th 12:50 to 12:56 (PM)
+
+s5, s4, s1 = SYN flood
+s2, s3 = Bursty Traffic
+
+10) start = 1744183786
+end = 1744184100
+
+April 9th 1:00 to 1:06 (PM)
+
+s5, s1 = SYN flood attack
+s2, s3, s4 = Elephant Traffic
+
+11) start = 1744184229
+end = 1744184550
+
+April 9th 1:07 to 1:12 (PM)
+
+s4, s1, s3 = SYN flood
+s2, s5 = Elephant Traffic
+
+12) start = 1744184593
+end = 1744184900
+
+April 9th 1:13 to 1:18 (PM)
+
+s3, s1  = SYN flood
+s2, s4, s5 = Normal Traffic
+
+13) start = 1744187755
+end = 1744188100
+
+April 9th 2:05 to 2:11 (PM)
+
+s5, s4, s3 = SYN flood
+s1, s2 = Elephant Traffic
+
+14) start = 1744188129
+end = 1744188450
+
+April 9th 2:12 to 2:18 (PM)
+
+s5 = SYN flood
+s1, s2, s3, s4 = bursty traffic
+
+
+
+
+
+
 

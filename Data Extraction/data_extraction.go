@@ -27,8 +27,8 @@ type PrometheusResponse struct {
 }
 
 var duration = "5m"
-var start = "1743589290"
-var end = "1743589340"
+var start = "1744188129"
+var end = "1744188450"
 
 // Key - Metric Name
 // Value - Prometheus Query

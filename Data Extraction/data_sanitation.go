@@ -14,17 +14,16 @@ var infra_metrics = []string{
 
 // The field value dictates the label of type of attack on the switch
 // 0 -  Normal Low Traffic
+// 1 -  SYN flood attack
 // 2 -  Genuine Elephant Traffic
 // 3 -  Genuine Bursty Traffic
-// 4 -  SYN Flood Attack
-// 5 -  Flow Table Exhaustion Attack
 
 var switches map[string]string = map[string]string{
 	"s1": "3",
 	"s2": "3",
 	"s3": "3",
-	"s4": "0",
-	"s5": "0",
+	"s4": "3",
+	"s5": "1",
 }
 
 // contains checks if a given item exists in a slice of strings.
